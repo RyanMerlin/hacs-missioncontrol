@@ -130,7 +130,7 @@ class MCCoordinator(DataUpdateCoordinator):
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     self._url(PATH_AGENT_STATUS, agent_id=self._agent_id),
-                    json={"status": status},
+                    params={"status": status},
                     headers=self._headers,
                 ) as resp:
                     resp.raise_for_status()
