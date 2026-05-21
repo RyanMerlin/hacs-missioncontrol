@@ -37,7 +37,7 @@ class MCClient:
         self._headers = {"Authorization": f"Bearer {token}"}
 
     async def validate_and_create_mission(self) -> str:
-        """Validate token and create a home-assistant mission. Returns mission_id."""
+        """Validate token, then get or create the home-assistant mission. Returns mission_id."""
         async with aiohttp.ClientSession() as session:
             # Validate token via /auth/whoami (returns 401 on bad token, unlike /health)
             async with session.get(
@@ -47,7 +47,7 @@ class MCClient:
                     raise Exception("401 Unauthorized")
                 resp.raise_for_status()
 
-            # Create dedicated mission for this HA instance
+            # Try to create the mission; on 409 (already exists) fetch it from the list
             async with session.post(
                 f"{self._base_url}{PATH_MISSIONS}",
                 json={
@@ -56,6 +56,17 @@ class MCClient:
                 },
                 headers=self._headers,
             ) as resp:
+                if resp.status == 409:
+                    # Mission already exists — look it up by name
+                    async with session.get(
+                        f"{self._base_url}{PATH_MISSIONS}", headers=self._headers
+                    ) as list_resp:
+                        list_resp.raise_for_status()
+                        missions = await list_resp.json()
+                    for m in missions:
+                        if m.get("name") == "home-assistant":
+                            return m["id"]
+                    raise Exception("Mission conflict but 'home-assistant' not found in list")
                 resp.raise_for_status()
                 data = await resp.json()
                 return data["id"]
