@@ -10,8 +10,8 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 
 from .const import (
-    CONF_AGENT_NAME, CONF_CAPABILITIES, CONF_MC_URL, CONF_MISSION_ID,
-    CONF_SA_TOKEN, DOMAIN, ALL_CAPABILITIES, PATH_HEALTH, PATH_MISSIONS,
+    ALL_CAPABILITIES, CONF_AGENT_NAME, CONF_CAPABILITIES, CONF_MC_URL,
+    CONF_MISSION_ID, CONF_SA_TOKEN, DOMAIN, PATH_AUTH_WHOAMI, PATH_MISSIONS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -39,9 +39,9 @@ class MCClient:
     async def validate_and_create_mission(self) -> str:
         """Validate token and create a home-assistant mission. Returns mission_id."""
         async with aiohttp.ClientSession() as session:
-            # Validate token
+            # Validate token via /auth/whoami (returns 401 on bad token, unlike /health)
             async with session.get(
-                f"{self._base_url}{PATH_HEALTH}", headers=self._headers
+                f"{self._base_url}{PATH_AUTH_WHOAMI}", headers=self._headers
             ) as resp:
                 if resp.status == 401:
                     raise Exception("401 Unauthorized")

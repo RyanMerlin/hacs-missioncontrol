@@ -19,6 +19,7 @@ APPROVAL_TIMEOUT_S = 86400  # 24 hours
 
 # MC API paths
 PATH_HEALTH = "/health"
+PATH_AUTH_WHOAMI = "/auth/whoami"
 PATH_MISSIONS = "/missions"
 PATH_ENROLL = "/work/missions/{mission_id}/agents/enroll"
 PATH_AGENT_HEARTBEAT = "/work/agents/{agent_id}/heartbeat"

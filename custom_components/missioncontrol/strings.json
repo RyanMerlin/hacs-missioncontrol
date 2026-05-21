@@ -3,10 +3,10 @@
     "step": {
       "user": {
         "title": "Connect to MissionControl",
-        "description": "Enter your MC server URL and a Service Account token (mcs_sa_…).",
+        "description": "Enter your MC server URL and your session token (copy from ~/.mc/session.json or run `mc auth login`).",
         "data": {
           "mc_url": "MissionControl URL",
-          "sa_token": "Service Account Token"
+          "sa_token": "API Token"
         }
       },
       "agent": {

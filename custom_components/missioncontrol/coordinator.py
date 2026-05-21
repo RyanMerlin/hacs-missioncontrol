@@ -18,7 +18,7 @@ from .const import (
     APPROVAL_TIMEOUT_S, CONF_AGENT_ID, CONF_AGENT_NAME, CONF_CAPABILITIES,
     CONF_MC_URL, CONF_MISSION_ID, CONF_SA_TOKEN, DOMAIN,
     HEARTBEAT_INTERVAL_S, PATH_AGENT_HEARTBEAT, PATH_AGENT_NOTIFY,
-    PATH_AGENT_STATUS, PATH_ENROLL, PATH_HEALTH, PATH_TASK,
+    PATH_AGENT_STATUS, PATH_AUTH_WHOAMI, PATH_ENROLL, PATH_HEALTH, PATH_TASK,
     PATH_TASK_CLAIM, PATH_TASK_COMPLETE, PATH_TASK_FAIL,
     PATH_TASK_HEARTBEAT, PATH_TASK_PROGRESS,
     TASK_HEARTBEAT_INTERVAL_S, WS_BACKOFF_INITIAL_S, WS_BACKOFF_MAX_S,
@@ -77,10 +77,10 @@ class MCCoordinator(DataUpdateCoordinator):
     async def _validate_token(self) -> None:
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                self._url(PATH_HEALTH), headers=self._headers
+                self._url(PATH_AUTH_WHOAMI), headers=self._headers
             ) as resp:
                 if resp.status == 401:
-                    raise ConfigEntryAuthFailed("Invalid MC service account token")
+                    raise ConfigEntryAuthFailed("Invalid MC token")
                 resp.raise_for_status()
 
     async def _enroll_agent(self) -> None:
@@ -91,6 +91,7 @@ class MCCoordinator(DataUpdateCoordinator):
                 "ha_version": str(getattr(self.hass.config, "version", "unknown")),
                 "node": "home-assistant",
             },
+            "runtime_kind": "custom",
         }
         async with aiohttp.ClientSession() as session:
             async with session.post(
