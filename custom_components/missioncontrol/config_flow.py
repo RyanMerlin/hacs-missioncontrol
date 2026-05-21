@@ -8,6 +8,7 @@ import aiohttp
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import selector
 
 from .const import (
     ALL_CAPABILITIES, CONF_AGENT_NAME, CONF_CAPABILITIES, CONF_MC_URL,
@@ -23,8 +24,12 @@ STEP1_SCHEMA = vol.Schema({
 
 STEP2_SCHEMA = vol.Schema({
     vol.Required(CONF_AGENT_NAME, default="home-assistant"): str,
-    vol.Required(CONF_CAPABILITIES, default=ALL_CAPABILITIES): vol.All(
-        list, [vol.In(ALL_CAPABILITIES)]
+    vol.Required(CONF_CAPABILITIES, default=ALL_CAPABILITIES): selector.SelectSelector(
+        selector.SelectSelectorConfig(
+            options=ALL_CAPABILITIES,
+            multiple=True,
+            mode=selector.SelectSelectorMode.LIST,
+        )
     ),
 })
 
