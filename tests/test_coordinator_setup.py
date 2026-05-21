@@ -61,11 +61,16 @@ async def test_validate_token_raises_on_401(hass: HomeAssistant, coordinator):
 async def test_enroll_agent_stores_agent_id(hass: HomeAssistant, coordinator):
     resp = MagicMock()
     resp.raise_for_status = MagicMock()
-    resp.json = AsyncMock(return_value={"id": "agent-abc", "home_mission_id": "mission-123"})
+    resp.json = AsyncMock(return_value={
+        "id": "agent-abc",
+        "agent_public_id": "home-assistant-abc123",
+        "home_mission_id": "mission-123",
+    })
     session = _make_session_mock(post_resp=resp)
     with patch("aiohttp.ClientSession", return_value=session):
         await coordinator._enroll_agent()
     assert coordinator._agent_id == "agent-abc"
+    assert coordinator._agent_public_id == "home-assistant-abc123"
 
 
 async def test_heartbeat_silent_on_client_error(hass: HomeAssistant, coordinator):

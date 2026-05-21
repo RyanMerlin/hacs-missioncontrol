@@ -9,6 +9,7 @@ CONF_AGENT_NAME = "agent_name"
 CONF_CAPABILITIES = "capabilities"
 CONF_MISSION_ID = "mission_id"
 CONF_AGENT_ID = "agent_id"
+CONF_AGENT_PUBLIC_ID = "agent_public_id"
 
 # Timings
 HEARTBEAT_INTERVAL_S = 60
@@ -23,7 +24,7 @@ PATH_AUTH_WHOAMI = "/auth/whoami"
 PATH_MISSIONS = "/missions"
 PATH_ENROLL = "/work/missions/{mission_id}/agents/enroll"
 PATH_AGENT_HEARTBEAT = "/work/agents/{agent_id}/heartbeat"
-PATH_AGENT_STATUS = "/work/agents/{agent_id}/status"
+PATH_AGENT_STATUS = "/agents/{agent_public_id}"
 PATH_AGENT_NOTIFY = "/work/agents/{agent_id}/notify"
 PATH_TASK = "/work/tasks/{task_id}"
 PATH_TASK_CLAIM = "/work/tasks/{task_id}/claim"

@@ -16,7 +16,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
     APPROVAL_TIMEOUT_S, CONF_AGENT_ID, CONF_AGENT_NAME, CONF_CAPABILITIES,
-    CONF_MC_URL, CONF_MISSION_ID, CONF_SA_TOKEN, DOMAIN,
+    CONF_AGENT_PUBLIC_ID, CONF_MC_URL, CONF_MISSION_ID, CONF_SA_TOKEN, DOMAIN,
     HEARTBEAT_INTERVAL_S, PATH_AGENT_HEARTBEAT, PATH_AGENT_NOTIFY,
     PATH_AGENT_STATUS, PATH_AUTH_WHOAMI, PATH_ENROLL, PATH_HEALTH, PATH_TASK,
     PATH_TASK_CLAIM, PATH_TASK_COMPLETE, PATH_TASK_FAIL,
@@ -42,6 +42,7 @@ class MCCoordinator(DataUpdateCoordinator):
         self._capabilities: list[str] = entry.data[CONF_CAPABILITIES]
         self._mission_id: str = entry.data[CONF_MISSION_ID]
         self._agent_id: str | None = entry.data.get(CONF_AGENT_ID)
+        self._agent_public_id: str | None = entry.data.get(CONF_AGENT_PUBLIC_ID)
         self._backoff: int = WS_BACKOFF_INITIAL_S
         self._shutdown: bool = False
         self._ws_task: asyncio.Task | None = None
@@ -102,9 +103,14 @@ class MCCoordinator(DataUpdateCoordinator):
                 resp.raise_for_status()
                 data = await resp.json()
                 self._agent_id = data["id"]
+                self._agent_public_id = data["agent_public_id"]
                 self.hass.config_entries.async_update_entry(
                     self._entry,
-                    data={**self._entry.data, CONF_AGENT_ID: self._agent_id},
+                    data={
+                        **self._entry.data,
+                        CONF_AGENT_ID: self._agent_id,
+                        CONF_AGENT_PUBLIC_ID: self._agent_public_id,
+                    },
                 )
 
     async def _heartbeat(self, _now: Any = None) -> None:
@@ -124,13 +130,13 @@ class MCCoordinator(DataUpdateCoordinator):
             _LOGGER.warning("MC agent heartbeat failed: %s", err)
 
     async def _set_status(self, status: str) -> None:
-        if not self._agent_id:
+        if not self._agent_public_id:
             return
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    self._url(PATH_AGENT_STATUS, agent_id=self._agent_id),
-                    params={"status": status},
+                async with session.patch(
+                    self._url(PATH_AGENT_STATUS, agent_public_id=self._agent_public_id),
+                    json={"status": status},
                     headers=self._headers,
                 ) as resp:
                     resp.raise_for_status()
