@@ -65,17 +65,18 @@ async def test_step1_valid_proceeds_to_step2(hass: HomeAssistant, mock_mc_health
 
 
 async def test_step2_creates_entry(hass: HomeAssistant, mock_mc_healthy):
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"],
-        {"mc_url": "http://missioncontrol:8008", "sa_token": "mcs_sa_good"},
-    )
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"],
-        {"agent_name": "my-ha", "capabilities": ["home_control.light", "notify"]},
-    )
+    with patch("custom_components.missioncontrol.async_setup_entry", return_value=True):
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {"mc_url": "http://missioncontrol:8008", "sa_token": "mcs_sa_good"},
+        )
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {"agent_name": "my-ha", "capabilities": ["home_control.light", "notify"]},
+        )
     assert result["type"] == FlowResultType.CREATE_ENTRY
     assert result["data"]["mission_id"] == "test-mission-id"
     assert result["data"]["agent_name"] == "my-ha"
