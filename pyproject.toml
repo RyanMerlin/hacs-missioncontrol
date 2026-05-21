@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.backends.legacy:build"
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "hacs-missioncontrol"
@@ -10,8 +10,6 @@ dependencies = ["aiohttp>=3.9"]
 
 [project.optional-dependencies]
 test = [
-    "pytest==8.3.5",
-    "pytest-asyncio==0.24.0",
     "pytest-homeassistant-custom-component==0.13.192",
     "pytest-cov",
 ]
