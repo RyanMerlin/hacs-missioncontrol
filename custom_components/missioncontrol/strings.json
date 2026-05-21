@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to MissionControl",
+        "description": "Enter your MC server URL and a Service Account token (mcs_sa_…).",
+        "data": {
+          "mc_url": "MissionControl URL",
+          "sa_token": "Service Account Token"
+        }
+      },
+      "agent": {
+        "title": "Agent configuration",
+        "description": "Choose a name for this HA agent and which domains to expose.",
+        "data": {
+          "agent_name": "Agent name",
+          "capabilities": "Expose capabilities"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to MissionControl. Check URL and token.",
+      "invalid_auth": "Invalid service account token."
+    },
+    "abort": {
+      "already_configured": "MissionControl is already configured."
+    }
+  }
+}
