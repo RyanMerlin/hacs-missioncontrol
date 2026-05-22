@@ -3,7 +3,7 @@
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![CI](https://github.com/RyanMerlin/hacs-missioncontrol/actions/workflows/ci.yml/badge.svg)](https://github.com/RyanMerlin/hacs-missioncontrol/actions/workflows/ci.yml)
 
-Registers Home Assistant as a first-class agent in the [MissionControl](https://github.com/missioncontrol-ai/missioncontrol) fleet. HA enrolls via the MC mesh API, receives task assignments as WebSocket push messages, executes them as HA service calls, and reports completion back to MC.
+Registers Home Assistant as a first-class agent in the [MissionControl](https://github.com/RyanMerlin/missioncontrol) fleet. HA enrolls via the MC mesh API, receives task assignments as WebSocket push messages, executes them as HA service calls, and reports completion back to MC.
 
 ## Features
 
