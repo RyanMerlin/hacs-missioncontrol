@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 from datetime import timedelta
 from typing import Any
 
@@ -26,6 +27,22 @@ from .const import (
 from .models import HaTaskPayload, EPAgentState
 
 _LOGGER = logging.getLogger(__name__)
+
+_SAFE_ID_RE = re.compile(r'^[0-9a-zA-Z_-]{1,128}$')
+
+_ALLOWED_SERVICE_DOMAINS = {
+    "light", "switch", "climate", "cover", "scene",
+    "script", "media_player", "notify", "fan",
+    "input_boolean", "input_number", "input_select",
+    "automation", "vacuum", "lock",
+}
+
+
+def _validate_id(value: str, field: str) -> str:
+    """Validate that an ID from the server contains only safe characters."""
+    if not _SAFE_ID_RE.match(value):
+        raise ValueError(f"Invalid {field}: {value!r}")
+    return value
 
 
 class EPCoordinator(DataUpdateCoordinator):
@@ -102,8 +119,8 @@ class EPCoordinator(DataUpdateCoordinator):
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
-                self._agent_id = data["id"]
-                self._agent_public_id = data["agent_public_id"]
+                self._agent_id = _validate_id(data["id"], "agent_id")
+                self._agent_public_id = _validate_id(data["agent_public_id"], "agent_public_id")
                 self.hass.config_entries.async_update_entry(
                     self._entry,
                     data={
@@ -182,8 +199,17 @@ class EPCoordinator(DataUpdateCoordinator):
                                 except json.JSONDecodeError:
                                     continue
                                 if data.get("type") == "task_available":
+                                    try:
+                                        task_id = _validate_id(
+                                            data["task_id"], "task_id"
+                                        )
+                                    except (ValueError, KeyError) as err:
+                                        _LOGGER.warning(
+                                            "Ignoring task_available with invalid task_id: %s", err
+                                        )
+                                        continue
                                     self.hass.async_create_task(
-                                        self._handle_task(data["task_id"])
+                                        self._handle_task(task_id)
                                     )
                             elif msg.type in (
                                 aiohttp.WSMsgType.CLOSED,
@@ -323,6 +349,10 @@ class EPCoordinator(DataUpdateCoordinator):
             await self._execute_approval_gate(payload, task_id, claim_lease_id)
             return
 
+        if payload.domain not in _ALLOWED_SERVICE_DOMAINS:
+            raise ValueError(
+                f"Service domain '{payload.domain}' is not in the allowed list"
+            )
         await self.hass.services.async_call(
             payload.domain,
             payload.service,
