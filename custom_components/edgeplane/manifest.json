@@ -3,9 +3,9 @@
   "name": "EdgePlane",
   "codeowners": ["@ryanmerlin"],
   "config_flow": true,
-  "documentation": "https://github.com/ryanmerlin/hacs-edgeplane",
+  "documentation": "https://github.com/ryanmerlin/edgeplane-homeassistant",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/ryanmerlin/hacs-edgeplane/issues",
+  "issue_tracker": "https://github.com/ryanmerlin/edgeplane-homeassistant/issues",
   "requirements": ["aiohttp>=3.9"],
   "version": "0.1.1"
 }
